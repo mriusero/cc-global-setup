@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Watch a slice's tmux session and print one line per state worth acting on:
+#   QUESTION       a prompt is waiting for a human answer
+#   DONE           the session printed the agreed closing phrase
+#   LIMIT          a usage limit was hit
+#   IDLE           nothing changed on screen for two minutes
+#   SESSION ENDED  the tmux session is gone
+# Each state is followed by the last 30 non-empty lines of the pane. Meant to run inside the
+# pilot session's Monitor tool, so the pilot wakes up on events instead of polling.
+#   pilot-watch <session> [done-phrase]
+s="$1"; done_phrase="${2:-SLICE DONE}"
+last_sig=""; idle=0; state=""; emitted=""
+hash() { if command -v md5 >/dev/null; then md5; else md5sum; fi; }
+while true; do
+  if ! tmux has-session -t "$s" 2>/dev/null; then echo "[$s] SESSION ENDED"; exit 0; fi
+  pane=$(tmux capture-pane -p -t "$s" 2>/dev/null)
+  # An empty capture is a transient failure, not a change of state.
+  if [[ -z "${pane//[[:space:]]/}" ]]; then sleep 5; continue; fi
+  sig=$(printf '%s' "$pane" | hash)
+  if [[ "$sig" == "$last_sig" ]]; then idle=$((idle+5)); else idle=0; last_sig="$sig"; fi
+  # The brief itself quotes the closing phrase: ignore the line that announces it.
+  if printf '%s' "$pane" | grep -v "exact phrase" | grep -qiF "$done_phrase"; then new="DONE"
+  elif printf '%s' "$pane" | grep -qE "Enter to select|↑/↓|Esc to cancel|Do you want to|\(y/n\)|❯ 1\.|Other \(|Yes, |No, "; then new="QUESTION"
+  elif printf '%s' "$pane" | grep -qE "rate limit|usage limit|limit reached|Claude usage"; then new="LIMIT"
+  elif (( idle >= 120 )); then new="IDLE"
+  else new="RUNNING"; fi
+  # Emit a state once: a flap through RUNNING and back must not repeat it.
+  if [[ "$new" != "$state" && "$new" != "RUNNING" && "$new" != "$emitted" ]]; then
+    echo "[$s] $new"; printf '%s\n' "$pane" | grep -v '^[[:space:]]*$' | tail -30; emitted="$new"
+  fi
+  state="$new"; sleep 5
+done

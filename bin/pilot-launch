@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Launch a code session for one slice: a worktree branched from the base branch, a tmux session
+# named after the branch running `claude` fed with the brief from a file, and (macOS, optional)
+# a Terminal window attached to it so the human sees the slice without typing anything.
+# The pilot session then arms pilot-watch on the same name.
+#   pilot-launch <branch> <brief-file>
+# Env: PILOT_WT_ROOT (default ../<repo>-wt), PILOT_BASE (default main),
+#      PILOT_CLAUDE_ARGS (default "--model opus"), PILOT_OPEN_TERMINAL (default 1 on macOS).
+set -eu
+branch="$1"; brief="$2"
+root=$(git rev-parse --show-toplevel)
+wt_root=${PILOT_WT_ROOT:-"$root/../$(basename "$root")-wt"}
+wt="$wt_root/$branch"
+brief_abs=$(cd "$(dirname "$brief")" && pwd)/$(basename "$brief")
+
+[[ -d "$wt" ]] || git -C "$root" worktree add "$wt" -b "$branch" "${PILOT_BASE:-main}"
+# The brief goes through a file, not typed input: long typed input gets truncated.
+tmux new-session -d -s "$branch" -c "$wt" \
+  "claude ${PILOT_CLAUDE_ARGS:---model opus} \"\$(cat '$brief_abs')\"; exec \$SHELL"
+
+if [[ "$(uname)" == Darwin && "${PILOT_OPEN_TERMINAL:-1}" == 1 ]]; then
+  osascript >/dev/null <<APPLESCRIPT
+tell application "Terminal"
+  activate
+  do script "tmux attach -t $branch"
+  set custom title of front window to "$branch"
+end tell
+APPLESCRIPT
+fi
+echo "$branch: worktree $wt, tmux session '$branch' started"

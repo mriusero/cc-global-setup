@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "cc-global-setup",
+  "description": "One user-scope plugin: guardrails, status line, project standard and a parallel-session pilot for Claude Code.",
+  "owner": { "name": "mriusero" },
+  "plugins": [
+    {
+      "name": "cc-global-setup",
+      "description": "Guardrails, status line, project-config standard and a tmux + worktree pilot, configurable per feature.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

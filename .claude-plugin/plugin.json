@@ -1,0 +1,43 @@
+{
+  "name": "cc-global-setup",
+  "displayName": "Global setup: guardrails, status line, project standard, parallel pilot",
+  "version": "0.1.0",
+  "description": "User-scope Claude Code setup for every project: ask before commit/push/merge, rm→trash, a rich status line, a project-config standard with path-scoped rules, and a pilot that runs parallel sessions in tmux + git worktrees.",
+  "author": { "name": "mriusero" },
+  "homepage": "https://github.com/mriusero/cc-global-setup",
+  "repository": "https://github.com/mriusero/cc-global-setup",
+  "license": "MIT",
+  "keywords": ["guardrails", "git", "statusline", "worktree", "tmux", "parallel-sessions", "project-config"],
+  "userConfig": {
+    "git_guard": {
+      "type": "boolean",
+      "title": "Ask before commit / push / merge / PR",
+      "description": "Push, merge and gh pr create/merge always ask. Commit asks unless the project sets CLAUDE_GIT_GUARD_ALLOW=commit and the branch is not protected.",
+      "default": true
+    },
+    "protected_branches": {
+      "type": "string",
+      "title": "Protected branches",
+      "description": "Space-separated branches where commits always ask, even in opted-in projects.",
+      "default": "main master"
+    },
+    "safe_rm": {
+      "type": "boolean",
+      "title": "Turn rm into trash",
+      "description": "Rewrite `rm` commands to `trash` so deletions stay recoverable. No-op when no trash command is installed.",
+      "default": true
+    },
+    "project_audit": {
+      "type": "boolean",
+      "title": "Flag repos without Claude config",
+      "description": "At session start in a git repo without CLAUDE.md/AGENTS.md or .claude/, Claude offers /cc-global-setup:project-config.",
+      "default": true
+    },
+    "pilot_model": {
+      "type": "string",
+      "title": "Model for pilot code sessions",
+      "description": "Passed as --model to each code session the pilot launches.",
+      "default": "opus"
+    }
+  }
+}
