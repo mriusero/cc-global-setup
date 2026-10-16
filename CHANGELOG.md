@@ -3,6 +3,15 @@
 All notable changes to this plugin. Versions follow [semantic versioning](https://semver.org);
 each release is tagged `cc-global-setup--vX.Y.Z`.
 
+## [Unreleased]
+
+- `pilot-watch`: the closing phrase quoted at the prompt (an instruction typed to the session) no
+  longer counts as DONE, and only a real menu or yes/no prompt counts as QUESTION; prose that says
+  "Yes, " no longer does.
+- `pilot-launch`: a relative `PILOT_WT_ROOT` is resolved from the repo root, so a project can set
+  it in its `settings.json` env; the Terminal window it opens takes the first free third of
+  the screen in focus, from the right, so parallel slices sit side by side on any screen.
+
 ## [0.1.0] - 2026-10-16
 
 First public version: the user-scope setup I run in every project, packaged as one plugin.

@@ -18,9 +18,12 @@ while true; do
   if [[ -z "${pane//[[:space:]]/}" ]]; then sleep 5; continue; fi
   sig=$(printf '%s' "$pane" | hash)
   if [[ "$sig" == "$last_sig" ]]; then idle=$((idle+5)); else idle=0; last_sig="$sig"; fi
-  # The brief itself quotes the closing phrase: ignore the line that announces it.
-  if printf '%s' "$pane" | grep -v "exact phrase" | grep -qiF "$done_phrase"; then new="DONE"
-  elif printf '%s' "$pane" | grep -qE "Enter to select|↑/↓|Esc to cancel|Do you want to|\(y/n\)|❯ 1\.|Other \(|Yes, |No, "; then new="QUESTION"
+  # The brief and any instruction typed at the prompt quote the closing phrase: a line that says
+  # "exact" (the brief, in English or French) or that is the prompt itself (starts with the
+  # input glyph) never counts. Only the session's own output does.
+  if printf '%s' "$pane" | grep -viE "exact|^[[:space:]]*❯ [^0-9]" | grep -qiF "$done_phrase"; then new="DONE"
+  # A question is a real menu or a yes/no prompt, never prose that happens to say "Yes, ".
+  elif printf '%s' "$pane" | grep -qE "Enter to select|Esc to cancel|Do you want to proceed|\(y/n\)|^[[:space:]]*❯ 1\."; then new="QUESTION"
   elif printf '%s' "$pane" | grep -qE "rate limit|usage limit|limit reached|Claude usage"; then new="LIMIT"
   elif (( idle >= 120 )); then new="IDLE"
   else new="RUNNING"; fi

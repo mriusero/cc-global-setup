@@ -144,6 +144,12 @@ flowchart LR
   needs attention: a question for you, a finished slice, a usage limit, a stalled session.
 - **Resumable.** Each slice works from a plan file, so it can restart cleanly after a limit or a crash.
 - **Gated.** Code sessions never open pull requests. The pilot does, and asks you before every merge.
+- **Configurable per project.** `pilot-launch` reads `PILOT_WT_ROOT` (where the worktrees go,
+  relative to the repo root or absolute), `PILOT_BASE`, `PILOT_CLAUDE_ARGS` and
+  `PILOT_OPEN_TERMINAL` (the window it opens takes the first free third of the screen, from the
+  right); a project sets them once in the `env` of its `.claude/settings.json`.
+  `pilot-watch <session> [done-phrase]` takes the closing phrase as an argument when the
+  project's briefs use another language.
 - **Paced to your review capacity.** Run as many slices as can be genuinely reviewed: several
   when you work solo, fewer in a team, where each pull request also follows your team's
   conventions and review process.

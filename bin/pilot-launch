@@ -4,12 +4,15 @@
 # a Terminal window attached to it so the human sees the slice without typing anything.
 # The pilot session then arms pilot-watch on the same name.
 #   pilot-launch <branch> <brief-file>
-# Env: PILOT_WT_ROOT (default ../<repo>-wt), PILOT_BASE (default main),
+# Env: PILOT_WT_ROOT (default ../<repo>-wt; a relative path is taken from the repo root, so a
+#      project can set it in its settings.json env), PILOT_BASE (default main),
 #      PILOT_CLAUDE_ARGS (default "--model opus"), PILOT_OPEN_TERMINAL (default 1 on macOS).
+# The Terminal window takes a third of the screen in focus, the first one free from the right.
 set -eu
 branch="$1"; brief="$2"
 root=$(git rev-parse --show-toplevel)
 wt_root=${PILOT_WT_ROOT:-"$root/../$(basename "$root")-wt"}
+[[ "$wt_root" == /* ]] || wt_root="$root/$wt_root"
 wt="$wt_root/$branch"
 brief_abs=$(cd "$(dirname "$brief")" && pwd)/$(basename "$brief")
 
@@ -19,11 +22,33 @@ tmux new-session -d -s "$branch" -c "$wt" \
   "claude ${PILOT_CLAUDE_ARGS:---model opus} \"\$(cat '$brief_abs')\"; exec \$SHELL"
 
 if [[ "$(uname)" == Darwin && "${PILOT_OPEN_TERMINAL:-1}" == 1 ]]; then
+  # The visible screen in focus (menu bar and Dock excluded) cut in three, right third first,
+  # as {left, top, right, bottom} in the top-left coordinates Terminal's bounds use.
+  slots=$(osascript -l JavaScript -e 'ObjC.import("AppKit")
+    const h = $.NSScreen.screens.objectAtIndex(0).frame.size.height, v = $.NSScreen.mainScreen.visibleFrame
+    const top = Math.round(h - (v.origin.y + v.size.height)), bottom = top + Math.round(v.size.height)
+    const x = i => Math.round(v.origin.x + v.size.width * i / 3)
+    ;[3, 2, 1].map(i => `{${x(i - 1)}, ${top}, ${x(i)}, ${bottom}}`).join(", ")')
+  # Each slice takes the first third no Terminal window starts at, so parallel slices sit side
+  # by side; with all three taken, they stack in turn.
   osascript >/dev/null <<APPLESCRIPT
 tell application "Terminal"
+  set slots to {$slots}
+  set lefts to {}
+  repeat with w in windows
+    set end of lefts to item 1 of (get bounds of w)
+  end repeat
+  set chosen to item ((count of windows) mod 3 + 1) of slots
+  repeat with s in slots
+    if lefts does not contain item 1 of s then
+      set chosen to contents of s
+      exit repeat
+    end if
+  end repeat
   activate
   do script "tmux attach -t $branch"
   set custom title of front window to "$branch"
+  set bounds of front window to chosen
 end tell
 APPLESCRIPT
 fi
