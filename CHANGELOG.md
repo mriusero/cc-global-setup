@@ -3,13 +3,32 @@
 All notable changes to this plugin. Versions follow [semantic versioning](https://semver.org);
 each release is tagged `cc-global-setup--vX.Y.Z`.
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-10-16
 
-First public version.
+First public version: the user-scope setup I run in every project, packaged as one plugin.
 
-- Git guard: ask before push, merge and PR commands; commits ask unless the project opts in and the branch isn't protected.
-- Safe rm: `rm` rewritten to `trash`.
-- Status line with context usage, 5-hour and 7-day limits, worktree and model, installed by `/cc-global-setup:setup-statusline`.
-- Project standard: `/cc-global-setup:project-config`, nine path-scoped guides, session-start audit (CLAUDE.md or AGENTS.md).
-- Pilot: `/cc-global-setup:pilot`, `pilot-launch` and `pilot-watch` for parallel slices in tmux and git worktrees.
-- Every behavior-changing feature can be switched off in `/config`.
+### Highlights
+
+- **Git guard.** Claude asks before `git push`, `git merge`, `gh pr create` and `gh pr merge`, even in auto mode. Commits ask too, unless the project sets `CLAUDE_GIT_GUARD_ALLOW=commit` and the branch isn't protected.
+- **Safe rm.** `rm` is rewritten to `trash`, so deletions stay recoverable. A safety net, not a sandbox.
+- **Status line.** Context usage, 5-hour and 7-day limits with time to reset, branch, worktree and model. Installed with `/cc-global-setup:setup-statusline`.
+- **Project standard.** `/cc-global-setup:project-config` bootstraps or audits a repository's Claude setup (CLAUDE.md or AGENTS.md, `.claude/`). Nine path-scoped guides, checked against Claude Code 2.1.292. A session-start hook flags repositories with no configuration.
+- **Pilot.** `/cc-global-setup:pilot` runs a large plan as parallel slices, each in its own git worktree and tmux session, watched by `pilot-watch` and merged one pull request at a time after your approval.
+
+### Configuration
+
+Five switches, asked when the plugin is enabled and editable in `/config`: `git_guard`, `protected_branches`, `safe_rm`, `project_audit`, `pilot_model`.
+
+### Footprint
+
+About 330 tokens of always-on context (three skill descriptions). Hooks run outside the model and cost nothing.
+
+### Install
+
+```text
+/plugin marketplace add mriusero/cc-global-setup
+/plugin install cc-global-setup@cc-global-setup
+/cc-global-setup:setup-statusline
+```
+
+Requires Claude Code 2.1.269 or later and `jq`; the pilot also needs `tmux`. Tested on macOS and Linux.
