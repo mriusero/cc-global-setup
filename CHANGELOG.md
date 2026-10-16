@@ -5,6 +5,15 @@ each release is tagged `cc-global-setup--vX.Y.Z`.
 
 ## [Unreleased]
 
+- `pilot-watch`: DONE fires on every new occurrence of the closing phrase, not only on a change
+  of state; a session that closes a second time in the same window (after a review, a fix) was
+  silent before and the pilot waited for nothing.
+- `pilot-send`, new: delivers an instruction to a code session and checks it was taken; clears
+  leftovers from an idle input box, routes long text through a file and a pointer, retries the
+  Enter a paste sometimes swallows, prints SENT or STUCK.
+- Pilot skill and brief template: the project's review skills run at the end of the slice, before
+  the closing phrase; numbered closing phrases for later rounds; `pilot-send` for everything
+  typed into a session.
 - `pilot-watch`: the closing phrase quoted at the prompt (an instruction typed to the session) no
   longer counts as DONE, and only a real menu or yes/no prompt counts as QUESTION; prose that says
   "Yes, " no longer does.

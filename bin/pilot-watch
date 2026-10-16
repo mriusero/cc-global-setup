@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Watch a slice's tmux session and print one line per state worth acting on:
 #   QUESTION       a prompt is waiting for a human answer
-#   DONE           the session printed the agreed closing phrase
+#   DONE           the session printed the agreed closing phrase (again on every new occurrence)
 #   LIMIT          a usage limit was hit
 #   IDLE           nothing changed on screen for two minutes
 #   SESSION ENDED  the tmux session is gone
@@ -9,8 +9,9 @@
 # pilot session's Monitor tool, so the pilot wakes up on events instead of polling.
 #   pilot-watch <session> [done-phrase]
 s="$1"; done_phrase="${2:-SLICE DONE}"
-last_sig=""; idle=0; state=""; emitted=""
+last_sig=""; idle=0; state=""; emitted=""; last_done=0
 hash() { if command -v md5 >/dev/null; then md5; else md5sum; fi; }
+emit() { echo "[$s] $1"; printf '%s\n' "$pane" | grep -v '^[[:space:]]*$' | tail -30; }
 while true; do
   if ! tmux has-session -t "$s" 2>/dev/null; then echo "[$s] SESSION ENDED"; exit 0; fi
   pane=$(tmux capture-pane -p -t "$s" 2>/dev/null)
@@ -21,7 +22,15 @@ while true; do
   # The brief and any instruction typed at the prompt quote the closing phrase: a line that says
   # "exact" (the brief, in English or French) or that is the prompt itself (starts with the
   # input glyph) never counts. Only the session's own output does.
-  if printf '%s' "$pane" | grep -viE "exact|^[[:space:]]*❯ [^0-9]" | grep -qiF "$done_phrase"; then new="DONE"
+  done_count=$(printf '%s' "$pane" | grep -viE "exact|^[[:space:]]*❯ [^0-9]" | grep -ciF "$done_phrase" || true)
+  # A session that closes a second time in the same window (after a review, after a fix) prints
+  # the phrase once more. A rising count is a new DONE even when the state never left DONE:
+  # the first version of this script stayed silent on it and the pilot waited for nothing.
+  if (( done_count > last_done )); then
+    emit "DONE"; emitted="DONE"; state="DONE"; last_done=$done_count; sleep 5; continue
+  fi
+  last_done=$done_count
+  if (( done_count > 0 )); then new="DONE"
   # A question is a real menu or a yes/no prompt, never prose that happens to say "Yes, ".
   elif printf '%s' "$pane" | grep -qE "Enter to select|Esc to cancel|Do you want to proceed|\(y/n\)|^[[:space:]]*❯ 1\."; then new="QUESTION"
   elif printf '%s' "$pane" | grep -qE "rate limit|usage limit|limit reached|Claude usage"; then new="LIMIT"
@@ -29,7 +38,7 @@ while true; do
   else new="RUNNING"; fi
   # Emit a state once: a flap through RUNNING and back must not repeat it.
   if [[ "$new" != "$state" && "$new" != "RUNNING" && "$new" != "$emitted" ]]; then
-    echo "[$s] $new"; printf '%s\n' "$pane" | grep -v '^[[:space:]]*$' | tail -30; emitted="$new"
+    emit "$new"; emitted="$new"
   fi
   state="$new"; sleep 5
 done

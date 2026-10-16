@@ -1,6 +1,6 @@
 Code session `<branch>`, worktree `../<repo>-wt/<branch>`, branch of the same name from `main`.
-Conventional commits as you go, one per deliverable, free on this branch. **Never open a PR or
-run a review from this session**: the pilot session does that. Read first: `AGENTS.md`,
+Conventional commits as you go, one per deliverable, free on this branch. **Never open a PR
+from this session**: the pilot session does that. Read first: `AGENTS.md`,
 `.claude/plans/wip--<topic>.md` (your plan), and <the docs and files this slice needs>.
 
 # Subject
@@ -26,5 +26,8 @@ right now (never two sessions on the same module).>
 
 # End
 
-Stop on the exact phrase "SLICE DONE", followed by a three-line summary: what was delivered,
-what you actually ran to prove it, what remains open.
+1. `git merge main`, `<check command>` green.
+2. Run <the review skills this slice requires, e.g. `/security-review`> on your branch; treat
+   the important findings, one commit each, `<check command>` green again. A review's lesser findings go in your final message.
+3. Stop on the exact phrase "SLICE DONE", followed by a three-line summary: what was delivered,
+   what you actually ran to prove it (reviews included, with their verdicts), what remains open.

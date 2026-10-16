@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Send an instruction to a slice's code session, and make sure it was taken.
+#   pilot-send <session> <text | file.md>
+# A file, or any text longer than 300 characters, goes through a file and a short pointer is
+# typed: typed input beyond a few hundred characters sits in the input box and never submits.
+# When the session is idle and its input box holds leftovers, they are cleared first (one Ctrl-C,
+# never two: two would end the session). A pasted line sometimes needs a second Enter; this
+# script checks the prompt and retries up to three times, then says SENT or STUCK.
+set -eu
+s="$1"; what="$2"
+root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+wt_root=${PILOT_WT_ROOT:-"$root/../$(basename "$root")-wt"}
+[[ "$wt_root" == /* ]] || wt_root="$root/$wt_root"
+if [[ -f "$what" ]]; then
+  file=$(cd "$(dirname "$what")" && pwd)/$(basename "$what")
+elif (( ${#what} > 300 )); then
+  mkdir -p "$wt_root/consignes"
+  file="$wt_root/consignes/$s-$(date +%Y%m%dT%H%M%S).md"; printf '%s\n' "$what" > "$file"
+else
+  file=""
+fi
+if [[ -n "$file" ]]; then line="Lis et exécute $file"; else line="$what"; fi
+pane() { tmux capture-pane -p -t "$s" 2>/dev/null; }
+busy() { pane | grep -qE "to interrupt"; }
+# The prompt line: the last line starting with the input glyph, without the glyph.
+prompt() { pane | grep -E '^[[:space:]]*❯' | tail -1 | sed -E 's/^[[:space:]]*❯[[:space:]]*//'; }
+if ! busy && [[ -n "$(prompt)" ]]; then tmux send-keys -t "$s" C-c; sleep 1; fi
+tmux send-keys -t "$s" "$line" Enter
+head=${line:0:40}
+for _ in 1 2 3; do
+  sleep 5
+  if [[ "$(prompt)" != *"$head"* ]]; then echo "SENT: $line"; exit 0; fi
+  tmux send-keys -t "$s" Enter
+done
+echo "STUCK: the instruction still sits in the input box of '$s'"; exit 1
