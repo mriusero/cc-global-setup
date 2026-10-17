@@ -1,8 +1,11 @@
 # cc-global-setup
 
 One Claude Code plugin at the repo root, listed by `.claude-plugin/marketplace.json` (`source: "./"`).
-Everything is bash + jq. Its author uses it daily, loaded in place from this working copy.
+Everything is bash + jq. Its author uses it daily, installed from this working copy.
 
+- The installed plugin is a copy in Claude Code's plugin cache, not this working copy. Try a change
+  live with `claude --plugin-dir .`; once committed, `claude plugin marketplace update
+  cc-global-setup`, `claude plugin update cc-global-setup@cc-global-setup`, then restart.
 - Run `./tests/run.sh` after touching hooks, `bin/` or the status line; add a case for new behavior.
 - Portable to macOS: bash 3.2, BSD sed (`[[:space:]]`, not `\s`), no `timeout`.
 - Each feature that can be unwanted is a `userConfig` switch in `plugin.json`; hooks read it as

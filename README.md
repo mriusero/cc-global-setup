@@ -47,6 +47,18 @@ in `/config`.
 Plugins can't register Claude Code's status line on their own: the last command copies the
 script to `~/.claude/statusline.sh` and adds it to your settings. Run it again after an update.
 
+### Update
+
+Claude Code runs a copy of the plugin taken at install time, so a new release needs both steps,
+then a restart:
+
+```text
+claude plugin marketplace update cc-global-setup
+claude plugin update cc-global-setup@cc-global-setup
+```
+
+`/reload-plugins` alone reloads the same copy, not the new version.
+
 <a id="features"></a>
 ## Features
 
@@ -230,8 +242,8 @@ The plugin follows [semantic versioning](https://semver.org), independently of C
 
 | Bump | When |
 | --- | --- |
-| **Major** | An option or command is renamed or removed, or a default changes behavior |
-| **Minor** | A new feature or option |
+| **Major** | An option or command is renamed or removed, or a default changes behavior (from 1.0 on) |
+| **Minor** | A new feature or option; before 1.0, also a default that changes behavior |
 | **Patch** | Fixes, and guides updated for a newer Claude Code |
 
 Two files track Claude Code itself: the minimum version is stated in [Requirements](#requirements),
