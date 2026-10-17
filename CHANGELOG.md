@@ -5,21 +5,36 @@ each release is tagged `cc-global-setup--vX.Y.Z`.
 
 ## [Unreleased]
 
-- `pilot-watch`: DONE fires on every new occurrence of the closing phrase, not only on a change
-  of state; a session that closes a second time in the same window (after a review, a fix) was
-  silent before and the pilot waited for nothing.
-- `pilot-send`, new: delivers an instruction to a code session and checks it was taken; clears
+## [0.2.0] - 2026-10-17
+
+The pilot, after its first real days: what generalizing the scripts for release had changed is
+restored, and instructions now reach a code session reliably.
+
+### Added
+
+- `pilot-send`: delivers an instruction to a code session and checks it was taken. It clears
   leftovers from an idle input box, routes long text through a file and a pointer, retries the
-  Enter a paste sometimes swallows, prints SENT or STUCK.
+  Enter a paste sometimes swallows, and prints SENT or STUCK.
+
+### Changed
+
+- `pilot-launch` places the Terminal window it opens on the first free third of the screen in
+  focus, from the right, so parallel slices sit side by side on any screen.
+- `pilot-watch` fires DONE on every new occurrence of the closing phrase, not only on a change of
+  state: a session that closes a second time in the same window (after a review, a fix) was
+  silent before, and the pilot waited for nothing.
 - Pilot skill and brief template: the project's review skills run at the end of the slice, before
   the closing phrase; numbered closing phrases for later rounds; `pilot-send` for everything
   typed into a session.
-- `pilot-watch`: the closing phrase quoted at the prompt (an instruction typed to the session) no
-  longer counts as DONE, and only a real menu or yes/no prompt counts as QUESTION; prose that says
-  "Yes, " no longer does.
-- `pilot-launch`: a relative `PILOT_WT_ROOT` is resolved from the repo root, so a project can set
-  it in its `settings.json` env; the Terminal window it opens takes the first free third of
-  the screen in focus, from the right, so parallel slices sit side by side on any screen.
+
+### Fixed
+
+- `pilot-watch` ignored the brief line quoting the closing phrase by an English wording only, so
+  a brief in another language fired a false DONE; any line saying "exact" and the instruction
+  typed at the prompt no longer count. Only a real menu or yes/no prompt counts as QUESTION,
+  never prose that says "Yes, ".
+- `pilot-launch` resolves a relative `PILOT_WT_ROOT` from the repo root, so a project sets it once
+  in the env of its `settings.json`.
 
 ## [0.1.0] - 2026-10-16
 

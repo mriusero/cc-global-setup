@@ -1,7 +1,7 @@
 {
   "name": "cc-global-setup",
   "displayName": "Global setup: guardrails, status line, project standard, parallel pilot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "User-scope Claude Code setup for every project: ask before commit/push/merge, rm→trash, a rich status line, a project-config standard with path-scoped rules, and a pilot that runs parallel sessions in tmux + git worktrees.",
   "author": { "name": "mriusero" },
   "homepage": "https://github.com/mriusero/cc-global-setup",

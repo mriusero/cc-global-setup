@@ -9,7 +9,8 @@ Everything is bash + jq. Its author uses it daily, loaded in place from this wor
   `CLAUDE_PLUGIN_OPTION_<KEY>` and exit 0 when it is `false`.
 - Validate with `claude plugin validate .` and `claude plugin validate .claude-plugin/plugin.json`.
 - Release: bump `version` in `plugin.json` (semver: major = option/command renamed or removed or a
-  default changes behavior; minor = new feature or option; patch = fixes, guides refreshed),
+  default changes behavior, from 1.0 on; minor = new feature or option, and before 1.0 any
+  behavior change; patch = fixes, guides refreshed),
   update the README version badge, move the `CHANGELOG.md` section from Unreleased to the date,
   commit, then `claude plugin tag --push`: the release workflow publishes the GitHub release.
 - Raise the minimum Claude Code version in the README (badge + Requirements) when using a newer feature.

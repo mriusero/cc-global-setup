@@ -9,7 +9,7 @@ and a way to run parallel Claude sessions without losing control of what reaches
 
 [![tests](https://github.com/mriusero/cc-global-setup/actions/workflows/test.yml/badge.svg)](https://github.com/mriusero/cc-global-setup/actions/workflows/test.yml)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A5%202.1.269-D97757)](https://code.claude.com/docs/en/plugins)
-[![version](https://img.shields.io/badge/version-0.1.0-blue)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
 [![context cost](https://img.shields.io/badge/always--on%20context-~330%20tokens-brightgreen)](#principles)
 [![platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)](#requirements)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
